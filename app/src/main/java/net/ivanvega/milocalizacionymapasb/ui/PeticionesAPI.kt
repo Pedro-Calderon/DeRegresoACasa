@@ -6,14 +6,15 @@ import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.osmdroid.util.GeoPoint
 import java.io.IOException
 import java.util.ArrayList
 
-fun decodePoly(encoded: String): List<LatLng> {
-    val poly = ArrayList<LatLng>()
+fun decodePoly(encoded: String): List<GeoPoint> {
+    val poly = ArrayList<GeoPoint>()
     var index = 0
     val len = encoded.length
     var lat = 0
@@ -41,46 +42,42 @@ fun decodePoly(encoded: String): List<LatLng> {
         val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
         lng += dlng
 
-        val latLng = LatLng((lat.toDouble() / 1E5),
+        val geoPoint = GeoPoint((lat.toDouble() / 1E5),
             (lng.toDouble() / 1E5))
-        poly.add(latLng)
+        poly.add(geoPoint)
     }
 
     return poly
 }
 
-fun peticionAPIDirections(origen: GeoPoint) {
-    GlobalScope.launch(Dispatchers.IO) {
+suspend fun peticionAPIDirections(origen: GeoPoint): List<GeoPoint> = withContext(Dispatchers.IO){
+    val client = OkHttpClient()
+    val origin = "origin=${origen.latitude}, ${origen.longitude}"
+    val destination = "destination=20.119938, -101.178535"
+    val apiKey = "key=AIzaSyAhLjXhdCXWEFzgTlgytVfvYXB6FR6Htxg"
 
-        val client = OkHttpClient()
-        val origin = "origin=${origen.latitude}, ${origen.longitude}"
-        val destination = "destination=20.147582, -101.192098"
-        val apiKey = "key=AIzaSyAhLjXhdCXWEFzgTlgytVfvYXB6FR6Htxg"
+    val request = Request.Builder()
+        .url("https://maps.googleapis.com/maps/api/directions/json?$origin&$destination&$apiKey")
+        .build()
 
-        val request = Request.Builder()
-            .url("https://maps.googleapis.com/maps/api/directions/json?$origin&$destination&$apiKey")
-            .build()
+    val response = client.newCall(request).execute()
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+    if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-            val jsonString = response.body?.string()
-            println(jsonString)
+    val jsonString = response.body?.string()
 
-            val jsonObject = JsonParser().parse(jsonString).asJsonObject
+    val jsonObject = JsonParser().parse(jsonString).asJsonObject
 
-            val routes = jsonObject.getAsJsonArray("routes")
-            val legs = routes[0].asJsonObject.getAsJsonArray("legs")
-            val steps = legs[0].asJsonObject.getAsJsonArray("steps")
+    val routes = jsonObject.getAsJsonArray("routes")
+    val legs = routes[0].asJsonObject.getAsJsonArray("legs")
+    val steps = legs[0].asJsonObject.getAsJsonArray("steps")
 
-            val latLngs = ArrayList<LatLng>()
+    val geoPoints = ArrayList<GeoPoint>()
 
-            for (step in steps) {
-                val polyline = step.asJsonObject.getAsJsonObject("polyline").get("points").asString
-                latLngs.addAll(decodePoly(polyline))
-            }
-
-            println(latLngs)
-        }
+    for (step in steps) {
+        val polyline = step.asJsonObject.getAsJsonObject("polyline").get("points").asString
+        geoPoints.addAll(decodePoly(polyline))
     }
+
+    return@withContext geoPoints
 }

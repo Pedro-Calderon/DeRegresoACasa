@@ -33,6 +33,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.util.Log
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.runBlocking
 import net.ivanvega.milocalizacionymapasb.ui.peticionAPIDirections
 import org.osmdroid.util.GeoPoint
 
@@ -83,15 +84,14 @@ fun MiPrimerMapa() {
 fun MiMapaOSMDroidCompose() {
     val context = LocalContext.current
     val ubicacionActual= obtenerUbicacionActual(context)
-if (ubicacionActual!=null){
-    val apiDirections= peticionAPIDirections(ubicacionActual)
-}
 
     // define camera state
     val cameraState = rememberCameraState {
-        geoPoint = obtenerUbicacionActual(context) ?: GeoPoint(20.147582, -101.192098)
+        if (ubicacionActual != null) {
+            geoPoint = GeoPoint(ubicacionActual.latitude, ubicacionActual.longitude)
+        }
         Log.d("ActualUbi","$geoPoint")
-        zoom = 18.0 // optional, default is 5.0
+        zoom = 15.0 // optional, default is 5.0
     }
 
     // define marker state
@@ -101,9 +101,17 @@ if (ubicacionActual!=null){
 
     // define polyline
     val geoPoint = remember {
-        listOf( GeoPoint(obtenerUbicacionActual(context)?.latitude ?:20.147582,
-            obtenerUbicacionActual(context)?.longitude ?:-101.192098),
-            GeoPoint(20.14389, -101.15111))
+        if (ubicacionActual!=null){
+            runBlocking {
+                val apiDirections= peticionAPIDirections(ubicacionActual)
+                apiDirections.map {
+                    GeoPoint(it.latitude, it.longitude)}
+            }
+        }else
+        {
+            listOf(GeoPoint(20.147582, -101.192098),
+                   GeoPoint(20.14389, -101.15111))
+        }
     }
 
     // add node
