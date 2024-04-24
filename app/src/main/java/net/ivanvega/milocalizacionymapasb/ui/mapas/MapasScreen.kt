@@ -81,9 +81,11 @@ fun MiPrimerMapa() {
 
 @Composable
 fun MiMapaOSMDroidCompose() {
-    val apiDirections= peticionAPIDirections()
-
     val context = LocalContext.current
+    val ubicacionActual= obtenerUbicacionActual(context)
+if (ubicacionActual!=null){
+    val apiDirections= peticionAPIDirections(ubicacionActual)
+}
 
     // define camera state
     val cameraState = rememberCameraState {

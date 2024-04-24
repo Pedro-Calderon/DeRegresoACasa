@@ -8,6 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.osmdroid.util.GeoPoint
 import java.io.IOException
 import java.util.ArrayList
 
@@ -48,12 +49,12 @@ fun decodePoly(encoded: String): List<LatLng> {
     return poly
 }
 
-fun peticionAPIDirections() {
+fun peticionAPIDirections(origen: GeoPoint) {
     GlobalScope.launch(Dispatchers.IO) {
 
         val client = OkHttpClient()
-        val origin = "origin=uriangato"
-        val destination = "destination=moroleon"
+        val origin = "origin=${origen.latitude}, ${origen.longitude}"
+        val destination = "destination=20.147582, -101.192098"
         val apiKey = "key=AIzaSyAhLjXhdCXWEFzgTlgytVfvYXB6FR6Htxg"
 
         val request = Request.Builder()
