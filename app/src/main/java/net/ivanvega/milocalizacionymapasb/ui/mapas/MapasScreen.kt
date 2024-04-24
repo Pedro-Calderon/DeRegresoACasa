@@ -33,7 +33,9 @@ import android.location.Location
 import android.location.LocationManager
 import android.util.Log
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.runBlocking
+import net.ivanvega.milocalizacionymapasb.R
 import net.ivanvega.milocalizacionymapasb.ui.peticionAPIDirections
 import org.osmdroid.util.GeoPoint
 
@@ -98,6 +100,9 @@ fun MiMapaOSMDroidCompose() {
     val depokMarkerState = rememberMarkerState(
         geoPoint = cameraState.geoPoint
     )
+    val destinationMarkerState = rememberMarkerState(
+        geoPoint = GeoPoint(20.119938, -101.178535)
+    )
 
     // define polyline
     val geoPoint = remember {
@@ -113,6 +118,8 @@ fun MiMapaOSMDroidCompose() {
                    GeoPoint(20.14389, -101.15111))
         }
     }
+    val miUbi: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_my_location)
+    val miDestino: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_location_on)
 
     // add node
     OpenStreetMap(
@@ -121,8 +128,15 @@ fun MiMapaOSMDroidCompose() {
     ){
         // add marker here
         MarkerOSMDC(
-            state = depokMarkerState
-            // add marker state
+            state = depokMarkerState,
+            title = "Mi Ubicación",
+            icon = miUbi
+        // add marker state
+        )
+        MarkerOSMDC(
+            state = destinationMarkerState,
+            title = "Ubicación Destino",
+            icon = miDestino
         )
         // add polyline
         PolylineOSMDC(geoPoints = geoPoint)
