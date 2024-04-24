@@ -16,6 +16,7 @@ mapsCompose = "4.3.3"
 osmdroidAndroid = "6.1.18"
 osmAndrodCompose = "0.0.3"
 okhttp = "5.0.0-alpha.14"
+gson = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ maps-compose = { group = "com.google.maps.android", name = "maps-compose", versi
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroidAndroid" }
 osm-androd-compose = { group = "tech.utsmankece", name = "osm-androd-compose", version.ref = "osmAndrodCompose" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 
 [plugins]
