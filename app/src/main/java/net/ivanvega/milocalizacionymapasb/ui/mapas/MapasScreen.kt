@@ -33,6 +33,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.util.Log
 import androidx.compose.ui.platform.LocalContext
+import net.ivanvega.milocalizacionymapasb.ui.peticionAPIDirections
 import org.osmdroid.util.GeoPoint
 
 
@@ -80,6 +81,8 @@ fun MiPrimerMapa() {
 
 @Composable
 fun MiMapaOSMDroidCompose() {
+    val apiDirections= peticionAPIDirections()
+
     val context = LocalContext.current
 
     // define camera state
